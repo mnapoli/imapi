@@ -41,7 +41,8 @@ $hordeClient = new Horde_Imap_Client_Socket([
 $client = new Imapi\Client($hordeClient);
 ```
 
-## Reading emails
+
+## Reading
 
 ### Reading the inbox
 
@@ -82,4 +83,33 @@ $query = QueryBuilder::create('INBOX.Sent')
     ->getQuery();
 
 $emails = $client->getEmails($query);
+```
+
+### Reading folders
+
+```php
+$folders = $client->getFolders();
+```
+
+
+## Operations
+
+### Moving emails
+
+```php
+$emailIds = ['123', '456'];
+
+// Moving from the INBOX to the Archive folder
+$client->moveEmails($emailIds, 'INBOX', 'Archive');
+```
+
+### Deleting emails
+
+"Deleting" means simply moving to the trash folder. Unfortunately, the trash folder is custom to each provider,
+so you need to explicitly provide it:
+
+```php
+$emailIds = ['123', '456'];
+
+$client->deleteEmails($emailIds, 'Deleted Messages');
 ```
