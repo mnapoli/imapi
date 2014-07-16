@@ -1,0 +1,31 @@
+{
+    "name": "mnapoli/imapi",
+    "description": "IMAP API",
+    "license": "MIT",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Imapi\\": "src/Imapi/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\Imapi\\": "tests/"
+        }
+    },
+    "require": {
+        "php": ">=5.5",
+        "pear-pear.horde.org/Horde_Imap_Client": "~2.19",
+        "messaged/php-mime-mail-parser": "~1.0",
+        "exercise/htmlpurifier-bundle": "dev-master@dev"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.0"
+    },
+    "repositories": [
+        {
+            "type": "pear",
+            "url": "http://pear.horde.org"
+        }
+    ]
+}
