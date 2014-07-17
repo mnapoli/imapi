@@ -112,11 +112,13 @@ class Client
     /**
      * @param string $id
      * @param string $folder
-     * @return Email
+     * @return Email|null Returns null if the email was not found.
      */
     public function getEmailFromId($id, $folder = 'INBOX')
     {
-        return $this->fetchEmails($folder, [ $id ])[0];
+        $emails = $this->fetchEmails($folder, [ $id ]);
+
+        return (count($emails) > 0) ? $emails[0] : null;
     }
 
     /**
