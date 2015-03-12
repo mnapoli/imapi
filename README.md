@@ -1,5 +1,7 @@
 # Imapi
 
+**This library is experimental and not meant to be reused.**
+
 Imapi is a high level IMAP API for PHP.
 
 It aims to be different from other implementations:
