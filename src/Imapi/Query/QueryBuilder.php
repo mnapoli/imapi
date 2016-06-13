@@ -14,16 +14,12 @@ class QueryBuilder
      */
     private $query;
 
-    /**
-     * @param string|null $folder
-     * @return QueryBuilder
-     */
-    public static function create($folder = null)
+    public static function create(string $folder = null) : self
     {
         return new static($folder);
     }
 
-    private function __construct($folder = null)
+    private function __construct(string $folder = null)
     {
         $this->query = new Query();
 
@@ -32,19 +28,15 @@ class QueryBuilder
         }
     }
 
-    /**
-     * @return Query
-     */
-    public function getQuery()
+    public function getQuery() : Query
     {
         return $this->query;
     }
 
     /**
      * @param int $interval Number of seconds (e.g. 3600 will return emails of the last hour).
-     * @return $this
      */
-    public function youngerThan($interval)
+    public function youngerThan(int $interval) : self
     {
         $this->query->setYoungerThan($interval);
 

@@ -33,23 +33,21 @@ class Client
 
     /**
      * Connect to a remote IMAP server and return the client instance.
-     *
-     * @param string $host
-     * @param string $username
-     * @param string $password
-     * @param string $port
-     * @param string $secure
-     *
-     * @return Client
      */
-    public static function connect($host, $username, $password, $port = '143', $secure = 'tls')
+    public static function connect(
+        string $host,
+        string $username,
+        string $password,
+        string $port = '143',
+        string $secure = 'tls'
+    ) : self
     {
         $hordeClient = new Horde_Imap_Client_Socket([
             'username' => $username,
             'password' => $password,
             'hostspec' => $host,
-            'port'     => $port,
-            'secure'   => $secure,
+            'port' => $port,
+            'secure' => $secure,
         ]);
 
         return new static($hordeClient);
@@ -60,7 +58,7 @@ class Client
      *
      * @return string[]
      */
-    public function getFolders()
+    public function getFolders() : array
     {
         return array_keys($this->hordeClient->listMailboxes('*'));
     }
@@ -68,11 +66,9 @@ class Client
     /**
      * Finds the emails matching the query. If $query is null, then it will fetch the emails in the inbox.
      *
-     * @param Query $query
-     *
      * @return Email[]
      */
-    public function getEmails(Query $query = null)
+    public function getEmails(Query $query = null) : array
     {
         $hordeQuery = new Horde_Imap_Client_Search_Query();
 
@@ -91,11 +87,9 @@ class Client
      *
      * This method is obviously more efficient than getEmails() if you want to synchronize local mails.
      *
-     * @param Query $query
-     *
      * @return string[]
      */
-    public function getEmailIds(Query $query = null)
+    public function getEmailIds(Query $query = null) : array
     {
         $hordeQuery = new Horde_Imap_Client_Search_Query();
 
@@ -110,23 +104,20 @@ class Client
     }
 
     /**
-     * @param string $id
-     * @param string $folder
      * @return Email|null Returns null if the email was not found.
      */
-    public function getEmailFromId($id, $folder = 'INBOX')
+    public function getEmailFromId(string $id, string $folder = 'INBOX')
     {
-        $emails = $this->fetchEmails($folder, [ $id ]);
+        $emails = $this->fetchEmails($folder, [$id]);
 
         return (count($emails) > 0) ? $emails[0] : null;
     }
 
     /**
      * @param string[] $ids
-     * @param string   $folder
      * @return Email[]
      */
-    public function getEmailsFromId(array $ids, $folder = 'INBOX')
+    public function getEmailsFromId(array $ids, string $folder = 'INBOX') : array
     {
         return $this->fetchEmails($folder, $ids);
     }
@@ -134,11 +125,9 @@ class Client
     /**
      * Move emails from one folder to another.
      *
-     * @param int[]  $ids
-     * @param string $from
-     * @param string $to
+     * @param int[] $ids
      */
-    public function moveEmails(array $ids, $from, $to)
+    public function moveEmails(array $ids, string $from, string $to)
     {
         $this->hordeClient->copy((string) $from, (string) $to, [
             'ids' => new Horde_Imap_Client_Ids($ids),
@@ -149,9 +138,9 @@ class Client
     /**
      * Delete emails by moving them to the trash folder.
      *
-     * @param int[]  $ids
+     * @param int[] $ids
      * @param string $trashFolder Trash folder. There is no standard default, it can be 'Deleted Messages', 'Trash'…
-     * @param string $fromFolder  Folder from which the email Ids come from.
+     * @param string $fromFolder Folder from which the email Ids come from.
      */
     public function deleteEmails(array $ids, $trashFolder, $fromFolder = 'INBOX')
     {
@@ -159,21 +148,17 @@ class Client
     }
 
     /**
-     * @param string                         $folder
-     * @param Horde_Imap_Client_Search_Query $query
      * @return Email[]
      */
-    private function searchAndFetch($folder, Horde_Imap_Client_Search_Query $query)
+    private function searchAndFetch(string $folder, Horde_Imap_Client_Search_Query $query) : array
     {
         return $this->fetchEmails($folder, $this->search($folder, $query));
     }
 
     /**
-     * @param string                         $folder
-     * @param Horde_Imap_Client_Search_Query $query
      * @return int[]
      */
-    private function search($folder, Horde_Imap_Client_Search_Query $query)
+    private function search(string $folder, Horde_Imap_Client_Search_Query $query) : array
     {
         $results = $this->hordeClient->search($folder, $query);
         /** @var Horde_Imap_Client_Ids $results */
@@ -182,7 +167,7 @@ class Client
         return $results->ids;
     }
 
-    private function fetchEmails($folder, array $ids)
+    private function fetchEmails(string $folder, array $ids) : array
     {
         $query = new Horde_Imap_Client_Fetch_Query();
         $query->envelope();
@@ -198,10 +183,7 @@ class Client
         return $this->emailFactory->createMany($folder, $hordeEmails);
     }
 
-    /**
-     * @return Horde_Imap_Client_Socket
-     */
-    public function getHordeClient()
+    public function getHordeClient() : Horde_Imap_Client_Socket
     {
         return $this->hordeClient;
     }

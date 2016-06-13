@@ -20,18 +20,12 @@ class Query
      */
     private $youngerThan;
 
-    /**
-     * @return string
-     */
-    public function getFolder()
+    public function getFolder() : string
     {
         return $this->folder;
     }
 
-    /**
-     * @param string $folder
-     */
-    public function setFolder($folder)
+    public function setFolder(string $folder)
     {
         $this->folder = $folder;
     }
@@ -47,7 +41,7 @@ class Query
     /**
      * @param int $youngerThan Number of seconds (e.g. 3600 will return emails of the last hour).
      */
-    public function setYoungerThan($youngerThan)
+    public function setYoungerThan(int $youngerThan)
     {
         $this->youngerThan = $youngerThan;
     }

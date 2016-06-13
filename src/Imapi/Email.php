@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 
 namespace Imapi;
 
@@ -66,11 +67,11 @@ class Email
      * @param EmailAddress[] $to
      */
     public function __construct(
-        $id,
-        $mailbox,
-        $subject,
-        $htmlContent,
-        $textContent,
+        string $id,
+        string $mailbox,
+        string $subject,
+        string $htmlContent,
+        string $textContent,
         array $from = [],
         array $to = []
     ) {
@@ -83,42 +84,27 @@ class Email
         $this->to = $to;
     }
 
-    /**
-     * @return string
-     */
-    public function getId()
+    public function getId() : string
     {
         return $this->id;
     }
 
-    /**
-     * @return string
-     */
-    public function getMailbox()
+    public function getMailbox() : string
     {
         return $this->mailbox;
     }
 
-    /**
-     * @return string
-     */
-    public function getSubject()
+    public function getSubject() : string
     {
         return $this->subject;
     }
 
-    /**
-     * @return string
-     */
-    public function getHtmlContent()
+    public function getHtmlContent() : string
     {
         return $this->htmlContent;
     }
 
-    /**
-     * @return string
-     */
-    public function getTextContent()
+    public function getTextContent() : string
     {
         return $this->textContent;
     }
@@ -131,9 +117,6 @@ class Email
         return $this->date;
     }
 
-    /**
-     * @param DateTime $date
-     */
     public function setDate(DateTime $date)
     {
         $this->date = $date;
@@ -142,7 +125,7 @@ class Email
     /**
      * @return EmailAddress[]
      */
-    public function getFrom()
+    public function getFrom() : array
     {
         return $this->from;
     }
@@ -150,23 +133,17 @@ class Email
     /**
      * @return EmailAddress[]
      */
-    public function getTo()
+    public function getTo() : array
     {
         return $this->to;
     }
 
-    /**
-     * @param bool $read
-     */
-    public function setRead($read)
+    public function setRead(bool $read)
     {
-        $this->read = (bool) $read;
+        $this->read = $read;
     }
 
-    /**
-     * @return bool
-     */
-    public function isRead()
+    public function isRead() : bool
     {
         return $this->read;
     }

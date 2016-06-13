@@ -6,50 +6,46 @@ namespace Imapi;
  * Email address associated to a name.
  *
  * Example: "John Doe" <john@example.com>
+ *
+ * @author Matthieu Napoli <matthieu@mnapoli.fr>
  */
 class EmailAddress
 {
     /**
      * @var string
      */
-    protected $email;
+    private $email;
 
     /**
-     * @var string
+     * @var string|null
      */
-    protected $name;
+    private $name;
 
-    public function __construct($email, $name = null)
+    public function __construct(string $email, string $name = null)
     {
         $this->email = $email;
         $this->name = $name;
     }
 
-    /**
-     * @return string
-     */
-    public function getEmail()
+    public function getEmail() : string
     {
         return $this->email;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getName()
     {
         return $this->name;
     }
 
-    /**
-     * @return string
-     */
-    public function getNameOrEmail()
+    public function getNameOrEmail() : string
     {
         return $this->name ?: $this->email;
     }
 
-    public function __toString()
+    public function __toString() : string
     {
         if ($this->name == null) {
             return $this->email;

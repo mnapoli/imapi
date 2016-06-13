@@ -23,12 +23,7 @@ class EmailFactory
         $this->htmlFilter = $htmlFilter ?: $this->createHTMLPurifier();
     }
 
-    /**
-     * @param string                       $mailbox
-     * @param Horde_Imap_Client_Data_Fetch $hordeEmail
-     * @return Email
-     */
-    public function create($mailbox, Horde_Imap_Client_Data_Fetch $hordeEmail)
+    public function create(string $mailbox, Horde_Imap_Client_Data_Fetch $hordeEmail) : Email
     {
         // Parse the message body
         $parser = new Parser();
@@ -78,11 +73,10 @@ class EmailFactory
     }
 
     /**
-     * @param string                                                         $mailbox
      * @param Horde_Imap_Client_Data_Fetch[]|Horde_Imap_Client_Fetch_Results $hordeEmails
      * @return Email[]
      */
-    public function createMany($mailbox, $hordeEmails)
+    public function createMany(string $mailbox, $hordeEmails) : array
     {
         $emails = [];
 
@@ -93,7 +87,7 @@ class EmailFactory
         return $emails;
     }
 
-    private function createHTMLPurifier()
+    private function createHTMLPurifier() : HTMLPurifier
     {
         return new HTMLPurifier(HTMLPurifier_Config::createDefault());
     }
