@@ -5,7 +5,7 @@
     "type": "library",
     "autoload": {
         "psr-4": {
-            "Imapi\\": "src/Imapi/"
+            "Imapi\\": "src/"
         }
     },
     "autoload-dev": {
