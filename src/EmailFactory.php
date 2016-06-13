@@ -9,7 +9,7 @@ use Horde_Imap_Client_Fetch_Results;
 use Horde_Mail_Rfc822_Address;
 use HTMLPurifier;
 use HTMLPurifier_Config;
-use MimeMailParser\Parser;
+use PhpMimeMailParser\Parser;
 
 class EmailFactory
 {
