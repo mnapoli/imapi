@@ -21,7 +21,9 @@ on [Horde's library page](http://dev.horde.org/imap_client/):
 
 ## Getting started
 
-First, install the project with Composer: `mnapoli/imapi`.
+```
+composer require mnapoli/imapi
+```
 
 The easy way:
 
