@@ -101,8 +101,16 @@ class EmailFactory
         return new HTMLPurifier(HTMLPurifier_Config::createDefault());
     }
 
-    private function parseMessageId($messageId) : null
+    /**
+     * @param string|null $messageId
+     * @return string|null
+     */
+    private function parseMessageId($messageId)
     {
+        if (!$messageId) {
+            return null;
+        }
+
         $result = preg_match('/<([^>]*)>/', $messageId, $matches);
 
         if ($result === false) {
