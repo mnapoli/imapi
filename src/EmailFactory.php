@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 
 namespace Imapi;
 
@@ -39,29 +40,37 @@ class EmailFactory
             $htmlContent = nl2br($textContent);
         }
 
+        // The envelope contains the headers
+        $envelope = $hordeEmail->getEnvelope();
+
         $from = [];
-        foreach ($hordeEmail->getEnvelope()->from as $hordeFrom) {
+        foreach ($envelope->from as $hordeFrom) {
             /** @var Horde_Mail_Rfc822_Address $hordeFrom */
             $from[] = new EmailAddress($hordeFrom->bare_address, $hordeFrom->personal);
         }
         $to = [];
-        foreach ($hordeEmail->getEnvelope()->to as $hordeTo) {
+        foreach ($envelope->to as $hordeTo) {
             /** @var Horde_Mail_Rfc822_Address $hordeTo */
             $to[] = new EmailAddress($hordeTo->bare_address, $hordeTo->personal);
         }
 
+        $messageId = $this->parseMessageId($envelope->message_id);
+        $inReplyTo = $this->parseMessageId($envelope->in_reply_to);
+
         $message = new Email(
-            $hordeEmail->getUid(),
+            (string) $hordeEmail->getUid(),
+            $messageId,
             $mailbox,
-            $hordeEmail->getEnvelope()->subject,
+            $envelope->subject,
             $htmlContent,
             $textContent,
             $from,
-            $to
+            $to,
+            $inReplyTo
         );
 
         $date = new DateTime();
-        $date->setTimestamp($hordeEmail->getEnvelope()->date->getTimestamp());
+        $date->setTimestamp($envelope->date->getTimestamp());
         $message->setDate($date);
 
         $flags = $hordeEmail->getFlags();
@@ -90,5 +99,19 @@ class EmailFactory
     private function createHTMLPurifier() : HTMLPurifier
     {
         return new HTMLPurifier(HTMLPurifier_Config::createDefault());
+    }
+
+    private function parseMessageId($messageId) : null
+    {
+        $result = preg_match('/<([^>]*)>/', $messageId, $matches);
+
+        if ($result === false) {
+            throw new \Exception('Unexpected error while parsing message ID ' . $messageId);
+        }
+        if ($result === 0) {
+            return null;
+        }
+
+        return $matches[1];
     }
 }

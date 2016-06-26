@@ -15,7 +15,12 @@ class Email
     /**
      * @var string
      */
-    private $id;
+    private $uid;
+
+    /**
+     * @var string|null
+     */
+    private $messageId;
 
     /**
      * @var string
@@ -58,35 +63,61 @@ class Email
     private $read = false;
 
     /**
-     * @param string         $id
-     * @param string         $mailbox
-     * @param string         $subject
-     * @param string         $htmlContent
-     * @param string         $textContent
+     * @var string|null
+     */
+    private $inReplyTo;
+
+    /**
+     * @param string|null $messageId
      * @param EmailAddress[] $from
      * @param EmailAddress[] $to
+     * @param string|null $inReplyTo
      */
     public function __construct(
-        string $id,
+        string $uid,
+        $messageId,
         string $mailbox,
         string $subject,
         string $htmlContent,
         string $textContent,
         array $from = [],
-        array $to = []
+        array $to = [],
+        $inReplyTo
     ) {
+        $this->uid = $uid;
+        $this->messageId = $messageId;
         $this->mailbox = $mailbox;
-        $this->id = $id;
         $this->subject = $subject;
         $this->htmlContent = $htmlContent;
         $this->textContent = $textContent;
         $this->from = $from;
         $this->to = $to;
+        $this->inReplyTo = $inReplyTo;
     }
 
-    public function getId() : string
+    /**
+     * Returns the UID of the IMAP message.
+     *
+     * This ID is set by the IMAP server.
+     *
+     * UID of the email may be not unique on the server (2 messages in different folders may have same UID).
+     *
+     * @see http://www.limilabs.com/blog/unique-id-in-imap-protocol
+     */
+    public function getUid() : string
     {
-        return $this->id;
+        return $this->uid;
+    }
+
+    /**
+     * Returns the "Message-ID" header.
+     *
+     * @see https://en.wikipedia.org/wiki/Message-ID
+     * @return string|null
+     */
+    public function getMessageId()
+    {
+        return $this->messageId;
     }
 
     public function getMailbox() : string
@@ -146,5 +177,15 @@ class Email
     public function isRead() : bool
     {
         return $this->read;
+    }
+
+    /**
+     * Message ID of the email this email is a reply to.
+     *
+     * @return string|null
+     */
+    public function getInReplyTo()
+    {
+        return $this->inReplyTo;
     }
 }
