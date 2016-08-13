@@ -72,6 +72,8 @@ class Client
     {
         $hordeQuery = new Horde_Imap_Client_Search_Query();
 
+        $query = $query ?: new Query;
+
         if ($query->getYoungerThan() !== null) {
             $hordeQuery->intervalSearch(
                 $query->getYoungerThan(),
@@ -92,6 +94,8 @@ class Client
     public function getEmailIds(Query $query = null) : array
     {
         $hordeQuery = new Horde_Imap_Client_Search_Query();
+
+        $query = $query ?: new Query;
 
         if ($query->getYoungerThan() !== null) {
             $hordeQuery->intervalSearch(
