@@ -46,12 +46,16 @@ class EmailFactory
         $from = [];
         foreach ($envelope->from as $hordeFrom) {
             /** @var Horde_Mail_Rfc822_Address $hordeFrom */
-            $from[] = new EmailAddress($hordeFrom->bare_address, $hordeFrom->personal);
+            if ($hordeFrom->bare_address) {
+                $from[] = new EmailAddress($hordeFrom->bare_address, $hordeFrom->personal);
+            }
         }
         $to = [];
         foreach ($envelope->to as $hordeTo) {
             /** @var Horde_Mail_Rfc822_Address $hordeTo */
-            $to[] = new EmailAddress($hordeTo->bare_address, $hordeTo->personal);
+            if ($hordeTo->bare_address) {
+                $to[] = new EmailAddress($hordeTo->bare_address, $hordeTo->personal);
+            }
         }
 
         $messageId = $this->parseMessageId($envelope->message_id);
