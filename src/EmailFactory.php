@@ -29,8 +29,8 @@ class EmailFactory
         // Parse the message body
         $parser = new Parser();
         $parser->setText($hordeEmail->getFullMsg());
-        $htmlContent = utf8_encode((string) $parser->getMessageBody('html'));
-        $textContent = utf8_encode((string) $parser->getMessageBody('text'));
+        $htmlContent = (string) $parser->getMessageBody('html');
+        $textContent = (string) $parser->getMessageBody('text');
 
         // Filter HTML body to have only safe HTML
         $htmlContent = trim($this->htmlFilter->purify($htmlContent));
