@@ -45,4 +45,13 @@ class Query
     {
         $this->youngerThan = $youngerThan;
     }
+    
+    public function setFlags($key,$value){
+        $this->flags[$key] = $value;
+    }
+    
+    public function getFlags(){
+        return $this->flags;
+    }
+
 }

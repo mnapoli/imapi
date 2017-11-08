@@ -84,6 +84,8 @@ Both `getEmails()` and `getEmailIds()` can take an optional `Query` object.
 // Read from the `INBOX.Sent` folder
 $query = QueryBuilder::create('INBOX.Sent')
     ->youngerThan(3600) // 1 hour
+    ->flagSeen(true) // return messages with \\seen flag set, or false for messages with seen flag off. 
+                     // more options are flagAnswered(boolean), flagDeleted(boolean),flagDraft(boolean),flagFlaged(boolean),flagRecent(boolean)
     ->getQuery();
 
 $emails = $client->getEmails($query);
