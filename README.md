@@ -91,7 +91,7 @@ $query = QueryBuilder::create('INBOX.Sent')
 $emails = $client->getEmails($query);
 ```
 
-Both `getEmails()` and `getEmailIds()` can take a second optional `boolean` argument. it can be set to fault to indicate change of flag of matched emails to seen.
+Both `getEmails()` and `getEmailIds()` can take a third optional `boolean` argument. it can be set to false to indicate change of flag for fetched emails to seen.
 
 ```php
 $query = QueryBuilder::create('INBOX.Sent')
@@ -100,7 +100,7 @@ $query = QueryBuilder::create('INBOX.Sent')
                      
     ->getQuery();
 
-$emails = $client->getEmails($query, false); // set to "false" fetched emails' state will be set to seen "true" no change of state will occur. default is true
+$emails = $client->getEmails($query,'INBOX', false); // set to "false" fetched emails' state will be set to seen. "true" no change of state will occur. default is true
 ```
 
 ### Reading folders
