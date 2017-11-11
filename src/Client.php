@@ -25,6 +25,12 @@ class Client
      */
     private $emailFactory;
 
+      /**
+     * 
+     * @var boolean
+     */
+    private $peek;
+    
     public function __construct(Horde_Imap_Client_Socket $hordeClient, EmailFactory $emailFactory = null)
     {
         $this->hordeClient = $hordeClient;
@@ -63,25 +69,25 @@ class Client
         return array_keys($this->hordeClient->listMailboxes('*'));
     }
 
-    /**
+     /**
      * Finds the emails matching the query. If $query is null, then it will fetch the emails in the inbox.
-     *
+     * @param Query $query Description
+     * @param boolean $peek sets the peek option, "false" fetched emails' state will be set to seen "true" no change of state default is true
      * @return Email[]
      */
-    public function getEmails(Query $query = null) : array
-    {
+    public function getEmails(Query $query = null, $peek = true): array {
         $hordeQuery = new Horde_Imap_Client_Search_Query();
 
         $query = $query ?: new Query;
 
         if ($query->getYoungerThan() !== null) {
             $hordeQuery->intervalSearch(
-                $query->getYoungerThan(),
-                Horde_Imap_Client_Search_Query::INTERVAL_YOUNGER
+                    $query->getYoungerThan(), Horde_Imap_Client_Search_Query::INTERVAL_YOUNGER
             );
         }
-
+        $this->setPeek($peek);
         $this->setFlags($hordeQuery, $query);
+
         return $this->searchAndFetch($query->getFolder(), $hordeQuery);
     }
 
@@ -89,31 +95,36 @@ class Client
      * Finds the email Ids matching the query. If $query is null, then it will fetch the email Ids in the inbox.
      *
      * This method is obviously more efficient than getEmails() if you want to synchronize local mails.
-     *
+     * 
+     * @param Query $query Description
+     * @param boolean $peek sets the peek option, "false" fetched emails' state will be set to seen "true" no change of state default is true
      * @return string[]
      */
-    public function getEmailIds(Query $query = null) : array
-    {
+    public function getEmailIds(Query $query = null, $peek = true): array {
         $hordeQuery = new Horde_Imap_Client_Search_Query();
 
         $query = $query ?: new Query;
 
         if ($query->getYoungerThan() !== null) {
             $hordeQuery->intervalSearch(
-                $query->getYoungerThan(),
-                Horde_Imap_Client_Search_Query::INTERVAL_YOUNGER
+                    $query->getYoungerThan(), Horde_Imap_Client_Search_Query::INTERVAL_YOUNGER
             );
         }
 
+        $this->setPeek($peek);
         $this->setFlags($hordeQuery, $query);
+
         return $this->search($query->getFolder(), $hordeQuery);
     }
 
     /**
+     * @param String $id Description
+     * @param boolean $peek sets the peek option, "false" fetched emails' state will be set to seen "true" no change of state default is true
+     * @param String $folder the folder to get email from
      * @return Email|null Returns null if the email was not found.
      */
-    public function getEmailFromId(string $id, string $folder = 'INBOX')
-    {
+    public function getEmailFromId(string $id, bool $peek = true, string $folder = 'INBOX') {
+        $this->setPeek($peek);
         $emails = $this->fetchEmails($folder, [$id]);
 
         return (count($emails) > 0) ? $emails[0] : null;
@@ -121,10 +132,12 @@ class Client
 
     /**
      * @param string[] $ids
+     * @param boolean $peek sets the peek option, "false" fetched emails' state will be set to seen "true" no change of state default is true
+     * @param String $folder the folder to get emails from
      * @return Email[]
      */
-    public function getEmailsFromId(array $ids, string $folder = 'INBOX') : array
-    {
+    public function getEmailsFromId(array $ids, bool $peek = true, string $folder = 'INBOX'): array {
+        $this->setPeek($peek);
         return $this->fetchEmails($folder, $ids);
     }
 
@@ -219,5 +232,12 @@ class Client
                 }
             }
         }
+    }
+    /**
+     * 
+     * @param boolean $peek
+     */
+    public function setPeek($peek) {
+        $this->peek = $peek;
     }
 }

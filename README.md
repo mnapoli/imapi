@@ -91,6 +91,18 @@ $query = QueryBuilder::create('INBOX.Sent')
 $emails = $client->getEmails($query);
 ```
 
+Both `getEmails()` and `getEmailIds()` can take a second optional `boolean` argument. it can be set to fault to indicate change of flag of matched emails to seen.
+
+```php
+$query = QueryBuilder::create('INBOX.Sent')
+    ->youngerThan(3600)
+    ->flagSeen(true)  
+                     
+    ->getQuery();
+
+$emails = $client->getEmails($query, false); // set to "false" fetched emails' state will be set to seen "true" no change of state will occur. default is true
+```
+
 ### Reading folders
 
 ```php
