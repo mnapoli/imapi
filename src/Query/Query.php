@@ -19,8 +19,16 @@ class Query
      * @var int
      */
     private $youngerThan;
+    private $flags = [];
 
-    public function getFolder() : string
+    const FLAG_ANSWERED = 'ANSWERED';
+    const FLAG_DELETED = 'DELETED';
+    const FLAG_DRAFT = 'DRAFT';
+    const FLAG_FLAGED = 'FLAGGED';
+    const FLAG_RECENT = 'RECENT';
+    const FLAG_SEEN = 'SEEN';
+    
+    public function getFolder(): string 
     {
         return $this->folder;
     }
@@ -46,11 +54,13 @@ class Query
         $this->youngerThan = $youngerThan;
     }
     
-    public function setFlags($key,$value){
+    public function setFlags($key,$value)
+    {
         $this->flags[$key] = $value;
     }
     
-    public function getFlags(){
+    public function getFlags()
+    {
         return $this->flags;
     }
 

@@ -43,32 +43,38 @@ class QueryBuilder
         return $this;
     }
 
-    public function flagAnswered($value) {
+    public function flagAnswered($value) 
+    {
         $this->query->setFlags(Query::FLAG_ANSWERED, $value);
         return $this;
     }
 
-    public function flagDeleted($value) {
+    public function flagDeleted($value) 
+    {
         $this->query->setFlags(Query::FLAG_DELETED, $value);
         return $this;
     }
 
-    public function flagDraft($value) {
+    public function flagDraft($value) 
+    {
         $this->query->setFlags(Query::FLAG_DRAFT, $value);
         return $this;
     }
 
-    public function flagFlaged($value) {
+    public function flagFlaged($value) 
+    {
         $this->query->setFlags(Query::FLAG_FLAGED, $value);
         return $this;
     }
 
-    public function flagRecent($value) {
+    public function flagRecent($value) 
+    {
         $this->query->setFlags(Query::FLAG_RECENT, $value);
         return $this;
     }
 
-    public function flagSeen($value) {
+    public function flagSeen($value)
+    {
         $this->query->setFlags(Query::FLAG_SEEN, $value);
         return $this;
     }
