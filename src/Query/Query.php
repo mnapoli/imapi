@@ -20,6 +20,11 @@ class Query
      */
     private $youngerThan;
 
+    /**
+     * @var array
+     */
+    private $flags = [];
+
     public function getFolder() : string
     {
         return $this->folder;
