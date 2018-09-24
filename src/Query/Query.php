@@ -60,12 +60,13 @@ class Query
         $this->youngerThan = $youngerThan;
     }
     
-    public function setFlags($key,$value){
-        $this->flags[$key] = $value;
+    public function setFlag(string $key, bool $set)
+    {
+        $this->flags[$key] = $set;
     }
     
-    public function getFlags(){
+    public function getFlags(): array
+    {
         return $this->flags;
     }
-
 }
