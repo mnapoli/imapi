@@ -177,7 +177,8 @@ class Client
         return $this->hordeClient;
     }
     
-    private function setFlags(Horde_Imap_Client_Search_Query $hordeQuery, Query $query){
+    private function setFlags(Horde_Imap_Client_Search_Query $hordeQuery, Query $query)
+    {
         if(count($query->getFlags()) > 0){
             foreach ($query->getFlags() as $key => $value){
                 $hordeQuery->flag($key, $value);
