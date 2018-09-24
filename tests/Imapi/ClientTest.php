@@ -235,4 +235,54 @@ class ClientTest extends TestCase
         $ret = $this->instance->getEmails($mockQuery);
         $this->assertEquals(['Los Parsed Messages'], $ret);
     }
+
+    public function testGetEmailsFromIds()
+    {
+        $this->mockEmailFactory->expects($this->once())
+            ->method('createMany')
+            ->with('Schmbox', 'Los Emails')
+            ->willReturn(['Los Parsed Messages']);
+
+        $this->mockHordeSocket->expects($this->once())
+            ->method('fetch')
+            ->with(
+                'Schmbox',
+                $this->anything(),
+                $this->callback(function ($arr) {
+                    $this->assertArrayHasKey('ids', $arr);
+                    $this->assertInstanceOf(Horde_Imap_Client_Ids::class, $arr['ids']);
+                    $this->assertEquals([1, 2, 3], $arr['ids']->ids);
+                    return true;
+                })
+            )
+            ->willReturn('Los Emails');
+
+        $ret = $this->instance->getEmailsFromIds([1, 2, 3], 'Schmbox');
+        $this->assertEquals(['Los Parsed Messages'], $ret);
+    }
+
+    public function testGetEmailFromId()
+    {
+        $this->mockEmailFactory->expects($this->once())
+            ->method('createMany')
+            ->with('Schmbox', 'Los Emails')
+            ->willReturn(['Los Parsed Messages']);
+
+        $this->mockHordeSocket->expects($this->once())
+            ->method('fetch')
+            ->with(
+                'Schmbox',
+                $this->anything(),
+                $this->callback(function ($arr) {
+                    $this->assertArrayHasKey('ids', $arr);
+                    $this->assertInstanceOf(Horde_Imap_Client_Ids::class, $arr['ids']);
+                    $this->assertEquals([1], $arr['ids']->ids);
+                    return true;
+                })
+            )
+            ->willReturn('Los Emails');
+
+        $ret = $this->instance->getEmailFromId(1, 'Schmbox');
+        $this->assertEquals('Los Parsed Messages', $ret);
+    }
 }
