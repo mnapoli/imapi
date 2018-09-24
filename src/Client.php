@@ -123,10 +123,14 @@ class Client
      */
     public function moveEmails(array $ids, string $from, string $to)
     {
-        $this->hordeClient->copy((string) $from, (string) $to, [
-            'ids' => new Horde_Imap_Client_Ids($ids),
-            'move' => true,
-        ]);
+        $this->hordeClient->copy(
+            $from,
+            $to,
+            [
+                'ids' => new Horde_Imap_Client_Ids($ids),
+                'move' => true,
+            ]
+        );
     }
 
     /**
