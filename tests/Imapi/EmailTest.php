@@ -2,21 +2,24 @@
 
 namespace Imapi;
 
-use Horde_Imap_Client;
-use Horde_Imap_Client_Data_Fetch;
 use HTMLPurifier;
-use ZBateson\MailMimeParser\MailMimeParser;
 use ZBateson\MailMimeParser\Message;
+use ZBateson\MailMimeParser\Header\DateHeader;
+use ZBateson\MailMimeParser\Header\AddressHeader;
+use DateTime;
 use PHPUnit\Framework\TestCase;
 
 /**
  *
  * @author Zaahid Bateson
  */
-class EmailFactoryTest extends TestCase
+class EmailTest extends TestCase
 {
     private $mockHtmlPurifier;
-    private $mockParser;
+    private $mockMessage;
+    private $uid = '007';
+    private $mailbox = 'Black';
+    private $read = true;
     private $instance;
 
     protected function setUp()
@@ -25,100 +28,127 @@ class EmailFactoryTest extends TestCase
             ->getMockBuilder(HTMLPurifier::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $this->mockParser = $this
-            ->getMockBuilder(MailMimeParser::class)
+        $this->mockMessage = $this
+            ->getMockBuilder(Message::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $this->instance = new EmailFactory(
-            $this->mockHtmlPurifier, $this->mockParser
+        $this->instance = new Email(
+            $this->mockHtmlPurifier,
+            $this->uid,
+            $this->mailbox,
+            $this->read,
+            $this->mockMessage
         );
     }
 
-    public function testCreate()
+    public function testInstance()
     {
-        $mockHordeEmail = $this
-            ->getMockBuilder(Horde_Imap_Client_Data_Fetch::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $mockHordeEmail->expects($this->once())
-            ->method('getFullMsg')
-            ->with(true)
-            ->willReturn('Stop your messing around');
-        $mockHordeEmail->expects($this->once())
-            ->method('getFlags')
-            ->willReturn([]);
-
-        $mockMessage = $this
-            ->getMockBuilder(Message::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->mockParser->expects($this->once())
-            ->method('parse')
-            ->with('Stop your messing around')
-            ->willReturn($mockMessage);
-
-        $ret = $this->instance->create('RudeBoy', $mockHordeEmail);
-        $this->assertEquals('RudeBoy', $ret->getMailbox());
-        $this->assertEquals($mockMessage, $ret->getMessage());
-        $this->assertFalse($ret->isRead());
+        $this->assertEquals($this->uid, $this->instance->getUid());
+        $this->assertEquals($this->mailbox, $this->instance->getMailbox());
+        $this->assertTrue($this->instance->isRead());
+        $this->assertEquals($this->mockMessage, $this->instance->getMessage());
     }
 
-    public function testCreateFlagSeen()
+    public function testGetMessageId()
     {
-        $mockHordeEmail = $this
-            ->getMockBuilder(Horde_Imap_Client_Data_Fetch::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $mockHordeEmail->expects($this->once())
-            ->method('getFlags')
-            ->willReturn([Horde_Imap_Client::FLAG_SEEN]);
-
-        $mockMessage = $this
-            ->getMockBuilder(Message::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->mockParser->expects($this->once())
-            ->method('parse')
-            ->willReturn($mockMessage);
-
-        $ret = $this->instance->create('RudeBoy', $mockHordeEmail);
-        $this->assertEquals('RudeBoy', $ret->getMailbox());
-        $this->assertEquals($mockMessage, $ret->getMessage());
-        $this->assertTrue($ret->isRead());
+        $this->mockMessage->expects($this->atLeastOnce())
+            ->method('getHeaderValue')
+            ->with('Message-ID')
+            ->willReturnOnConsecutiveCalls(null, 'spooky', '<sp00ky>');
+        $this->assertNull($this->instance->getMessageId());
+        $this->assertNull($this->instance->getMessageId());
+        $this->assertEquals('sp00ky', $this->instance->getMessageId());
     }
 
-    public function testCreateMany()
+    public function testGetInReplyTo()
     {
-        $mockEmails = [];
-        $mockMessages = [];
+        $this->mockMessage->expects($this->atLeastOnce())
+            ->method('getHeaderValue')
+            ->with('In-Reply-To')
+            ->willReturnOnConsecutiveCalls(null, 'spooky', '<sp00ky>');
+        $this->assertNull($this->instance->getInReplyTo());
+        $this->assertNull($this->instance->getInReplyTo());
+        $this->assertEquals('sp00ky', $this->instance->getInReplyTo());
+    }
 
-        for ($i = 0; $i < 3; ++$i) {
-            $mockEmails[$i] = $this
-                ->getMockBuilder(Horde_Imap_Client_Data_Fetch::class)
-                ->disableOriginalConstructor()
-                ->getMock();
-            $mockMessages[$i] = $this
-                ->getMockBuilder(Message::class)
-                ->disableOriginalConstructor()
-                ->getMock();
+    public function testGetHtmlContent()
+    {
+        $this->mockMessage->expects($this->once())
+            ->method('getHtmlContent')
+            ->willReturn('<u>redacted</u>');
+        $this->assertEquals('<u>redacted</u>', $this->instance->getHtmlContent());
+    }
 
-            $mockEmails[$i]->expects($this->once())
-                ->method('getFlags')
-                ->willReturn([]);
-        }
+    public function testGetTextContent()
+    {
+        $this->mockMessage->expects($this->once())
+            ->method('getTextContent')
+            ->willReturn('_redacted_');
+        $this->assertEquals('_redacted_', $this->instance->getTextContent());
+    }
 
-        $this->mockParser->expects($this->exactly(3))
-            ->method('parse')
-            ->willReturnOnConsecutiveCalls($mockMessages[0], $mockMessages[1], $mockMessages[2]);
+    public function testGetSanitizedHtmlContent()
+    {
+        $this->mockMessage->expects($this->once())
+            ->method('getHtmlContent')
+            ->willReturn('<u>redacted</u>');
+        $this->mockHtmlPurifier->expects($this->once())
+            ->method('purify')
+            ->with('<u>redacted</u>')
+            ->willReturn('  *purified*   ');
+        
+        $this->assertEquals('*purified*', $this->instance->getSanitizedHtmlContent());
+    }
 
-        $ret = $this->instance->createMany('RudeBoy', $mockEmails);
-        $this->assertCount(3, $ret);
-        $this->assertEquals('RudeBoy', $ret[0]->getMailbox());
-        $this->assertEquals($mockMessages[0], $ret[0]->getMessage());
-        $this->assertEquals($mockMessages[1], $ret[1]->getMessage());
-        $this->assertEquals($mockMessages[2], $ret[2]->getMessage());
+    public function testGetDate()
+    {
+        $dateMock = $this
+            ->getMockBuilder(DateHeader::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $dateTime = new DateTime;
+        $dateMock->expects($this->once())
+            ->method('getDateTime')
+            ->willReturn($dateTime);
+
+        $this->mockMessage->expects($this->exactly(2))
+            ->method('getHeader')
+            ->willReturnOnConsecutiveCalls(null, $dateMock);
+        $this->assertNull($this->instance->getDate());
+        $this->assertEquals($dateTime, $this->instance->getDate());
+    }
+
+    public function testGetFrom()
+    {
+        $addrMock = $this
+            ->getMockBuilder(AddressHeader::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $addrMock->expects($this->once())
+            ->method('getAddresses')
+            ->willReturn(['Behind ya']);
+
+        $this->mockMessage->expects($this->exactly(2))
+            ->method('getHeader')
+            ->willReturnOnConsecutiveCalls(null, $addrMock);
+        $this->assertNull($this->instance->getFrom());
+        $this->assertEquals(['Behind ya'], $this->instance->getFrom());
+    }
+
+    public function testGetTo()
+    {
+        $addrMock = $this
+            ->getMockBuilder(AddressHeader::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $addrMock->expects($this->once())
+            ->method('getAddresses')
+            ->willReturn(['Behind ya']);
+
+        $this->mockMessage->expects($this->exactly(2))
+            ->method('getHeader')
+            ->willReturnOnConsecutiveCalls(null, $addrMock);
+        $this->assertNull($this->instance->getTo());
+        $this->assertEquals(['Behind ya'], $this->instance->getTo());
     }
 }
