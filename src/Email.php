@@ -1,9 +1,10 @@
 <?php
-declare(strict_types = 1);
 
 namespace Imapi;
 
 use DateTime;
+use HTMLPurifier;
+use ZBateson\MailMimeParser\Message;
 
 /**
  * Email.
@@ -13,86 +14,49 @@ use DateTime;
 class Email
 {
     /**
+     * @var HTMLPurifier
+     */
+    private $htmlFilter;
+
+    /**
      * @var string
      */
     private $uid;
-
-    /**
-     * @var string|null
-     */
-    private $messageId;
-
+    
     /**
      * @var string
      */
     private $mailbox;
 
     /**
-     * @var string
+     * @var Message
      */
-    private $subject;
-
-    /**
-     * @var string
-     */
-    private $htmlContent;
-
-    /**
-     * @var string
-     */
-    private $textContent;
-
-    /**
-     * @var DateTime|null
-     */
-    private $date;
-
-    /**
-     * @var EmailAddress[]
-     */
-    private $from = [];
-
-    /**
-     * @var EmailAddress[]
-     */
-    private $to = [];
+    private $message;
 
     /**
      * @var bool
      */
-    private $read = false;
+    private $read;
 
     /**
-     * @var string|null
-     */
-    private $inReplyTo;
-
-    /**
-     * @param string|null $messageId
-     * @param EmailAddress[] $from
-     * @param EmailAddress[] $to
-     * @param string|null $inReplyTo
+     * @param HTMLPurifier $htmlFilter
+     * @param string $uid
+     * @param string $mailbox
+     * @param bool $read
+     * @param Message $message
      */
     public function __construct(
+        HTMLPurifier $htmlFilter,
         string $uid,
-        $messageId,
         string $mailbox,
-        string $subject,
-        string $htmlContent,
-        string $textContent,
-        array $from = [],
-        array $to = [],
-        $inReplyTo
+        bool $read,
+        Message $message
     ) {
+        $this->htmlFilter = $htmlFilter;
         $this->uid = $uid;
-        $this->messageId = $messageId;
         $this->mailbox = $mailbox;
-        $this->subject = $subject;
-        $this->htmlContent = $htmlContent;
-        $this->textContent = $textContent;
-        $this->from = $from;
-        $this->to = $to;
-        $this->inReplyTo = $inReplyTo;
+        $this->read = $read;
+        $this->message = $message;
     }
 
     /**
@@ -117,66 +81,9 @@ class Email
      */
     public function getMessageId()
     {
-        return $this->messageId;
-    }
-
-    public function getMailbox() : string
-    {
-        return $this->mailbox;
-    }
-
-    public function getSubject() : string
-    {
-        return $this->subject;
-    }
-
-    public function getHtmlContent() : string
-    {
-        return $this->htmlContent;
-    }
-
-    public function getTextContent() : string
-    {
-        return $this->textContent;
-    }
-
-    /**
-     * @return DateTime|null
-     */
-    public function getDate()
-    {
-        return $this->date;
-    }
-
-    public function setDate(DateTime $date)
-    {
-        $this->date = $date;
-    }
-
-    /**
-     * @return EmailAddress[]
-     */
-    public function getFrom() : array
-    {
-        return $this->from;
-    }
-
-    /**
-     * @return EmailAddress[]
-     */
-    public function getTo() : array
-    {
-        return $this->to;
-    }
-
-    public function setRead(bool $read)
-    {
-        $this->read = $read;
-    }
-
-    public function isRead() : bool
-    {
-        return $this->read;
+        return $this->parseMessageId(
+            $this->message->getHeaderValue('Message-ID')
+        );
     }
 
     /**
@@ -186,6 +93,88 @@ class Email
      */
     public function getInReplyTo()
     {
-        return $this->inReplyTo;
+        return $this->parseMessageId(
+            $this->message->getHeaderValue('In-Reply-To')
+        );
+    }
+
+    public function getMailbox() : string
+    {
+        return $this->mailbox;
+    }
+
+    public function getSubject() : string
+    {
+        return $this->message->getHeaderValue('Subject');
+    }
+
+    public function getHtmlContent() : string
+    {
+        return $this->message->getHtmlContent();
+    }
+
+    public function getSanitizedHtmlContent() : string
+    {
+        return $this->htmlFilter->purify($this->getHtmlContent());
+    }
+
+    public function getTextContent() : string
+    {
+        return $this->message->getTextContent();
+    }
+
+    /**
+     * @return DateTime|null
+     */
+    public function getDate()
+    {
+        $date = $this->message->getHeader('Date');
+        if ($date !== null) {
+            return $date->getDateTime();
+        }
+        return null;
+    }
+
+    /**
+     * @return \ZBateson\MailMimeParser\Header\Part\AddressPart[]|null
+     */
+    public function getFrom()
+    {
+        $from = $this->message->getHeader('From');
+        if ($from !== null) {
+            return $from->getAddresses();
+        }
+    }
+
+    /**
+     * @return \ZBateson\MailMimeParser\Header\Part\AddressPart[]|null
+     */
+    public function getTo()
+    {
+        $from = $this->message->getHeader('To');
+        if ($from !== null) {
+            return $from->getAddresses();
+        }
+    }
+
+    public function isRead() : bool
+    {
+        return $this->read;
+    }
+
+    /**
+     * @param string|null $messageId
+     * @return string|null
+     */
+    private function parseMessageId($messageId)
+    {
+        if (!$messageId) {
+            return null;
+        }
+        $result = preg_match('/<([^>]*)>/', $messageId, $matches);
+        if ($result === false || $result === 0) {
+            return null;
+        }
+        return $matches[1];
     }
 }

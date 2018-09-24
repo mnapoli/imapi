@@ -11,7 +11,7 @@
     "require": {
         "php": "~7.0",
         "pear-pear.horde.org/Horde_Imap_Client": "~2.29",
-        "php-mime-mail-parser/php-mime-mail-parser": "~2.0",
+        "zbateson/mail-mime-parser": "~1.0",
         "ezyang/htmlpurifier": "~4.7"
     },
     "require-dev": {
