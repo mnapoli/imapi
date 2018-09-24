@@ -51,7 +51,7 @@ class ClientTest extends TestCase
         $this->assertEquals(['folder1', 'folder2', 'folder3'], $ret);
     }
 
-    public function testGetEmails()
+    public function testGetEmailIds()
     {
         $mockQuery = $this->getMockBuilder(Query::class)
             ->disableOriginalConstructor()
@@ -79,48 +79,12 @@ class ClientTest extends TestCase
             )
             ->willReturn(['match' => $mockIds]);
 
-        $this->mockHordeSocket->expects($this->once())
-            ->method('fetch')
-            ->with(
-                'Schmbox',
-                $this->callback(function ($ob) {
-                    $this->assertTrue(isset($ob[Horde_Imap_Client::FETCH_ENVELOPE]));
-                    $this->assertTrue($ob[Horde_Imap_Client::FETCH_ENVELOPE]);
-
-                    $this->assertInstanceOf(Horde_Imap_Client_Fetch_Query::class, $ob);
-                    $this->assertNotEmpty($ob[Horde_Imap_Client::FETCH_FULLMSG]);
-                    $this->assertTrue(isset($ob[Horde_Imap_Client::FETCH_FULLMSG]['peek']));
-                    $this->assertTrue($ob[Horde_Imap_Client::FETCH_FULLMSG]['peek']);
-
-                    $this->assertTrue(isset($ob[Horde_Imap_Client::FETCH_FLAGS]));
-                    $this->assertTrue($ob[Horde_Imap_Client::FETCH_FLAGS]);
-                    return true;
-                }),
-                $this->callback(function ($arr) {
-                    $this->assertArrayHasKey('ids', $arr);
-                    $this->assertInstanceOf(Horde_Imap_Client_Ids::class, $arr['ids']);
-                    $this->assertEquals([1, 2, 3], $arr['ids']->ids);
-                    return true;
-                })
-            )
-            ->willReturn('Los Emails');
-
-        $this->mockEmailFactory->expects($this->once())
-            ->method('createMany')
-            ->with('Schmbox', 'Los Emails')
-            ->willReturn(['Los Parsed Messages']);
-
-        $ret = $this->instance->getEmails($mockQuery);
-        $this->assertEquals(['Los Parsed Messages'], $ret);
+        $ret = $this->instance->getEmailIds($mockQuery);
+        $this->assertEquals($mockIds->ids, $ret);
     }
 
-    public function testGetEmailsCreatesQuery()
+    public function testGetEmailIdsCreatesQuery()
     {
-        $this->mockEmailFactory->expects($this->once())
-            ->method('createMany')
-            ->with('INBOX', 'Los Emails')
-            ->willReturn(['Los Parsed Messages']);
-
         $mockIds = $this->getMockBuilder(Horde_Imap_Client_Ids::class)
             ->disableOriginalConstructor()
             ->getMock();
@@ -136,20 +100,11 @@ class ClientTest extends TestCase
             )
             ->willReturn(['match' => $mockIds]);
 
-        $this->mockHordeSocket->expects($this->once())
-            ->method('fetch')
-            ->with(
-                'INBOX',
-                $this->anything(),
-                $this->anything()
-            )
-            ->willReturn('Los Emails');
-
-        $ret = $this->instance->getEmails();
-        $this->assertEquals(['Los Parsed Messages'], $ret);
+        $ret = $this->instance->getEmailIds();
+        $this->assertEquals($mockIds->ids, $ret);
     }
 
-    public function testGetEmailsWithIntervalSearch()
+    public function testGetEmailIdsWithIntervalSearch()
     {
         $mockQuery = $this->getMockBuilder(Query::class)
             ->disableOriginalConstructor()
@@ -181,20 +136,11 @@ class ClientTest extends TestCase
             )
             ->willReturn(['match' => $mockIds]);
 
-        $this->mockHordeSocket->expects($this->once())
-            ->method('fetch')
-            ->willReturn('Los Emails');
-
-        $this->mockEmailFactory->expects($this->once())
-            ->method('createMany')
-            ->with('Schmbox', 'Los Emails')
-            ->willReturn(['Los Parsed Messages']);
-
-        $ret = $this->instance->getEmails($mockQuery);
-        $this->assertEquals(['Los Parsed Messages'], $ret);
+        $ret = $this->instance->getEmailIds($mockQuery);
+        $this->assertEquals($mockIds->ids, $ret);
     }
 
-    public function testGetEmailsSetFlags()
+    public function testGetEmailIdsSetFlags()
     {
         $mockQuery = $this->getMockBuilder(Query::class)
             ->disableOriginalConstructor()
@@ -223,15 +169,69 @@ class ClientTest extends TestCase
             )
             ->willReturn(['match' => $mockIds]);
 
+        $ret = $this->instance->getEmailIds($mockQuery);
+        $this->assertEquals($mockIds->ids, $ret);
+    }
+
+    public function testGetEmails()
+    {
+        $mockQuery = $this->getMockBuilder(Query::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $mockQuery->expects($this->once())
+            ->method('getFlags')
+            ->willReturn([]);
+        $mockQuery->expects($this->atLeastOnce())
+            ->method('getFolder')
+            ->willReturn('Schmbox');
+
+        $mockIds = $this->getMockBuilder(Horde_Imap_Client_Ids::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $mockIds->ids = [1, 2, 3];
         $this->mockHordeSocket->expects($this->once())
-            ->method('fetch')
-            ->willReturn('Los Emails');
+            ->method('search')
+            ->with(
+                'Schmbox',
+                $this->callback(function ($ob) {
+                    $this->assertInstanceOf(Horde_Imap_Client_Search_Query::class, $ob);
+                    return true;
+                })
+            )
+            ->willReturn(['match' => $mockIds]);
 
         $this->mockEmailFactory->expects($this->once())
             ->method('createMany')
             ->with('Schmbox', 'Los Emails')
             ->willReturn(['Los Parsed Messages']);
 
+        $this->mockHordeSocket->expects($this->once())
+            ->method('fetch')
+            ->with(
+                'Schmbox',
+                $this->callback(function ($ob) {
+                    $this->assertTrue(isset($ob[Horde_Imap_Client::FETCH_ENVELOPE]));
+                    $this->assertTrue($ob[Horde_Imap_Client::FETCH_ENVELOPE]);
+
+                    $this->assertInstanceOf(Horde_Imap_Client_Fetch_Query::class, $ob);
+                    $this->assertNotEmpty($ob[Horde_Imap_Client::FETCH_FULLMSG]);
+                    $this->assertTrue(isset($ob[Horde_Imap_Client::FETCH_FULLMSG]['peek']));
+                    $this->assertTrue($ob[Horde_Imap_Client::FETCH_FULLMSG]['peek']);
+
+                    $this->assertTrue(isset($ob[Horde_Imap_Client::FETCH_FLAGS]));
+                    $this->assertTrue($ob[Horde_Imap_Client::FETCH_FLAGS]);
+                    return true;
+                }),
+                $this->callback(function ($arr) {
+                    $this->assertArrayHasKey('ids', $arr);
+                    $this->assertInstanceOf(Horde_Imap_Client_Ids::class, $arr['ids']);
+                    $this->assertEquals([1, 2, 3], $arr['ids']->ids);
+                    return true;
+                })
+            )
+            ->willReturn('Los Emails');
+        
         $ret = $this->instance->getEmails($mockQuery);
         $this->assertEquals(['Los Parsed Messages'], $ret);
     }
