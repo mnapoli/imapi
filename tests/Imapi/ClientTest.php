@@ -51,11 +51,6 @@ class ClientTest extends TestCase
         $this->assertEquals(['folder1', 'folder2', 'folder3'], $ret);
     }
 
-    private function setupHordeSocketForGetEmailTest($folder = 'Schmbox')
-    {
-        
-    }
-
     public function testGetEmails()
     {
         $mockQuery = $this->getMockBuilder(Query::class)
@@ -121,8 +116,6 @@ class ClientTest extends TestCase
 
     public function testGetEmailsCreatesQuery()
     {
-        $this->setupHordeSocketForGetEmailTest();
-
         $this->mockEmailFactory->expects($this->once())
             ->method('createMany')
             ->with('INBOX', 'Los Emails')
@@ -183,6 +176,48 @@ class ClientTest extends TestCase
                 $this->callback(function ($ob) {
                     $this->assertInstanceOf(Horde_Imap_Client_Search_Query::class, $ob);
                     // no public interface to check the younger than search query
+                    return true;
+                })
+            )
+            ->willReturn(['match' => $mockIds]);
+
+        $this->mockHordeSocket->expects($this->once())
+            ->method('fetch')
+            ->willReturn('Los Emails');
+
+        $this->mockEmailFactory->expects($this->once())
+            ->method('createMany')
+            ->with('Schmbox', 'Los Emails')
+            ->willReturn(['Los Parsed Messages']);
+
+        $ret = $this->instance->getEmails($mockQuery);
+        $this->assertEquals(['Los Parsed Messages'], $ret);
+    }
+
+    public function testGetEmailsSetFlags()
+    {
+        $mockQuery = $this->getMockBuilder(Query::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $mockQuery->expects($this->atLeastOnce())
+            ->method('getFlags')
+            ->willReturn([Query::FLAG_ANSWERED => true, Query::FLAG_DELETED => false]);
+        $mockQuery->expects($this->once())
+            ->method('getFolder')
+            ->willReturn('Schmbox');
+        
+        $mockIds = $this->getMockBuilder(Horde_Imap_Client_Ids::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $mockIds->ids = [1, 2, 3];
+        $this->mockHordeSocket->expects($this->once())
+            ->method('search')
+            ->with(
+                'Schmbox',
+                $this->callback(function ($ob) {
+                    $this->assertInstanceOf(Horde_Imap_Client_Search_Query::class, $ob);
+                    // no public interface to check the set flags
                     return true;
                 })
             )

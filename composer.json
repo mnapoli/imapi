@@ -8,11 +8,6 @@
             "Imapi\\": "src/"
         }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "Imapi\\": "tests/Imapi"
-        }
-    },
     "require": {
         "php": "~7.0",
         "pear-pear.horde.org/Horde_Imap_Client": "~2.29",

@@ -194,29 +194,10 @@ class Client
         return $this->hordeClient;
     }
     
-    private function setFlags(Horde_Imap_Client_Search_Query $hordeQuery,Query $query){
+    private function setFlags(Horde_Imap_Client_Search_Query $hordeQuery, Query $query){
         if(count($query->getFlags()) > 0){
             foreach ($query->getFlags() as $key => $value){
-                switch ($key){
-                    case Query::FLAG_ANSWERED:
-                        $hordeQuery->flag(\Horde_Imap_Client::FLAG_ANSWERED, $value);
-                        break;
-                    case Query::FLAG_DELETED:
-                        $hordeQuery->flag(\Horde_Imap_Client::FLAG_DELETED, $value);
-                        break;
-                    case Query::FLAG_DRAFT:
-                        $hordeQuery->flag(\Horde_Imap_Client::FLAG_DRAFT, $value);
-                        break;
-                    case Query::FLAG_FLAGED:
-                        $hordeQuery->flag(\Horde_Imap_Client::FLAG_FLAGGED, $value);
-                        break;
-                    case Query::FLAG_RECENT:
-                        $hordeQuery->flag(\Horde_Imap_Client::FLAG_RECENT, $value);
-                        break;
-                    case Query::FLAG_SEEN:
-                        $hordeQuery->flag(\Horde_Imap_Client::FLAG_SEEN, $value);
-                        break;
-                }
+                $hordeQuery->flag($key, $value);
             }
         }
     }

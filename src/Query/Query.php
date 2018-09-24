@@ -2,6 +2,8 @@
 
 namespace Imapi\Query;
 
+use Horde_Imap_Client;
+
 /**
  * Query.
  *
@@ -9,6 +11,13 @@ namespace Imapi\Query;
  */
 class Query
 {
+    const FLAG_ANSWERED = Horde_Imap_Client::FLAG_ANSWERED;
+    const FLAG_DELETED = Horde_Imap_Client::FLAG_DELETED;
+    const FLAG_DRAFT = Horde_Imap_Client::FLAG_DRAFT;
+    const FLAG_FLAGGED = Horde_Imap_Client::FLAG_FLAGGED;
+    const FLAG_RECENT = Horde_Imap_Client::FLAG_RECENT;
+    const FLAG_SEEN = Horde_Imap_Client::FLAG_SEEN;
+
     /**
      * @var string
      */
