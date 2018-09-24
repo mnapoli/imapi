@@ -115,7 +115,7 @@ class Email
 
     public function getSanitizedHtmlContent() : string
     {
-        return $this->htmlFilter->purify($this->getHtmlContent());
+        return trim($this->htmlFilter->purify($this->getHtmlContent()));
     }
 
     public function getTextContent() : string
@@ -160,6 +160,11 @@ class Email
     public function isRead() : bool
     {
         return $this->read;
+    }
+
+    public function getMessage() : Message
+    {
+        return $this->message;
     }
 
     /**
