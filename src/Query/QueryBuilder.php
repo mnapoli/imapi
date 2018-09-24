@@ -39,38 +39,42 @@ class QueryBuilder
     public function youngerThan(int $interval) : self
     {
         $this->query->setYoungerThan($interval);
-
         return $this;
     }
 
-    public function flagAnswered($value) {
-        $this->query->setFlags(Query::FLAG_ANSWERED, $value);
+    public function flagAnswered(bool $set) : self
+    {
+        $this->query->setFlags(Query::FLAG_ANSWERED, $set);
         return $this;
     }
 
-    public function flagDeleted($value) {
-        $this->query->setFlags(Query::FLAG_DELETED, $value);
+    public function flagDeleted(bool $set) : self
+    {
+        $this->query->setFlags(Query::FLAG_DELETED, $set);
         return $this;
     }
 
-    public function flagDraft($value) {
-        $this->query->setFlags(Query::FLAG_DRAFT, $value);
+    public function flagDraft(bool $set) : self
+    {
+        $this->query->setFlags(Query::FLAG_DRAFT, $set);
         return $this;
     }
 
-    public function flagFlaged($value) {
-        $this->query->setFlags(Query::FLAG_FLAGED, $value);
+    public function flagFlaged(bool $set) : self
+    {
+        $this->query->setFlags(Query::FLAG_FLAGED, $set);
         return $this;
     }
 
-    public function flagRecent($value) {
-        $this->query->setFlags(Query::FLAG_RECENT, $value);
+    public function flagRecent(bool $set) : self
+    {
+        $this->query->setFlags(Query::FLAG_RECENT, $set);
         return $this;
     }
 
-    public function flagSeen($value) {
-        $this->query->setFlags(Query::FLAG_SEEN, $value);
+    public function flagSeen(bool $set) : self
+    {
+        $this->query->setFlags(Query::FLAG_SEEN, $set);
         return $this;
     }
-
 }
