@@ -144,6 +144,7 @@ class Email
         if ($from !== null) {
             return $from->getAddresses();
         }
+        return null;
     }
 
     /**
@@ -155,6 +156,7 @@ class Email
         if ($from !== null) {
             return $from->getAddresses();
         }
+        return null;
     }
 
     public function isRead() : bool
