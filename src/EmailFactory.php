@@ -9,7 +9,6 @@ use Horde_Imap_Client_Fetch_Results;
 use HTMLPurifier;
 use HTMLPurifier_Config;
 use ZBateson\MailMimeParser\MailMimeParser;
-use ZBateson\MailMimeParser\Message;
 
 class EmailFactory
 {
@@ -34,7 +33,7 @@ class EmailFactory
         $this->parser = $parser ?: new MailMimeParser();
     }
 
-    public function create(string $mailbox, Horde_Imap_Client_Data_Fetch $hordeEmail) : Message
+    public function create(string $mailbox, Horde_Imap_Client_Data_Fetch $hordeEmail) : Email
     {
         // Parse the message body
         $message = $this->parser->parse($hordeEmail->getFullMsg(true));
