@@ -33,6 +33,14 @@ class EmailFactory
         $this->parser = $parser ?: new MailMimeParser();
     }
 
+    /**
+     * Creates and returns an Email object out of the passed $mailbox and Horde
+     * email object.
+     *
+     * @param string $mailbox
+     * @param Horde_Imap_Client_Data_Fetch $hordeEmail
+     * @return \Imapi\Email
+     */
     public function create(string $mailbox, Horde_Imap_Client_Data_Fetch $hordeEmail) : Email
     {
         // Parse the message body
@@ -54,6 +62,9 @@ class EmailFactory
     }
 
     /**
+     * Creates and returns an array of Email objects from the passed Horde
+     * emails.
+     *
      * @param Horde_Imap_Client_Data_Fetch[]|Horde_Imap_Client_Fetch_Results $hordeEmails
      * @return Email[]
      */

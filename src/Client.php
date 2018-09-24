@@ -25,6 +25,13 @@ class Client
      */
     private $emailFactory;
 
+    /**
+     * Creates a client with the passed Horde client connection and optional
+     * EmailFactory.
+     *
+     * @param Horde_Imap_Client_Socket $hordeClient
+     * @param \Imapi\EmailFactory $emailFactory (mainly for testing)
+     */
     public function __construct(Horde_Imap_Client_Socket $hordeClient, EmailFactory $emailFactory = null)
     {
         $this->hordeClient = $hordeClient;
@@ -33,6 +40,13 @@ class Client
 
     /**
      * Connect to a remote IMAP server and return the client instance.
+     *
+     * @param string $host
+     * @param string $username
+     * @param string $password
+     * @param string $port
+     * @param string $secure
+     * @return Client
      */
     public static function connect(
         string $host,
@@ -64,10 +78,13 @@ class Client
     }
     
     /**
-     * Finds the email Ids matching the query. If $query is null, then it will fetch the email Ids in the inbox.
+     * Finds the email Ids matching the query. If $query is null, then it will
+     * fetch the email Ids in the inbox.
      *
-     * This method is obviously more efficient than getEmails() if you want to synchronize local mails.
+     * This method is obviously more efficient than getEmails() if you want to
+     * synchronize local mails.
      *
+     * @param Query $query
      * @return string[]
      */
     public function getEmailIds(Query $query = null) : array
@@ -88,8 +105,10 @@ class Client
     }
 
     /**
-     * Finds the emails matching the query. If $query is null, then it will fetch the emails in the inbox.
+     * Finds the emails matching the query. If $query is null, then it will
+     * fetch the emails in the inbox.
      *
+     * @param Query $query
      * @return Email[]
      */
     public function getEmails(Query $query = null) : array
@@ -99,6 +118,10 @@ class Client
     }
 
     /**
+     * Returns the single email with the passed $id, in the given $folder.
+     *
+     * @param string $id
+     * @param string $folder
      * @return Email|null Returns null if the email was not found.
      */
     public function getEmailFromId(string $id, string $folder = 'INBOX')
@@ -108,7 +131,10 @@ class Client
     }
 
     /**
+     * Returns all emails with the passed $ids, in the given folder
+     *
      * @param string[] $ids
+     * @param string $folder
      * @return Email[]
      */
     public function getEmailsFromIds(array $ids, string $folder = 'INBOX') : array
@@ -120,6 +146,8 @@ class Client
      * Move emails from one folder to another.
      *
      * @param int[] $ids
+     * @param string $from
+     * @param string $to
      */
     public function moveEmails(array $ids, string $from, string $to)
     {
@@ -137,10 +165,11 @@ class Client
      * Delete emails by moving them to the trash folder.
      *
      * @param int[] $ids
-     * @param string $trashFolder Trash folder. There is no standard default, it can be 'Deleted Messages', 'Trash'…
+     * @param string $trashFolder Trash folder. There is no standard default, it
+     *        can be 'Deleted Messages', 'Trash'…
      * @param string $fromFolder Folder from which the email Ids come from.
      */
-    public function deleteEmails(array $ids, $trashFolder, $fromFolder = 'INBOX')
+    public function deleteEmails(array $ids, string $trashFolder, string $fromFolder = 'INBOX')
     {
         $this->moveEmails($ids, $fromFolder, $trashFolder);
     }

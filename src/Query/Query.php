@@ -53,7 +53,8 @@ class Query
     }
 
     /**
-     * @param int $youngerThan Number of seconds (e.g. 3600 will return emails of the last hour).
+     * @param int $youngerThan Number of seconds (e.g. 3600 will return emails
+     *        of the last hour).
      */
     public function setYoungerThan(int $youngerThan)
     {
