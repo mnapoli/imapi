@@ -285,4 +285,54 @@ class ClientTest extends TestCase
         $ret = $this->instance->getEmailFromId(1, 'Schmbox');
         $this->assertEquals('Los Parsed Messages', $ret);
     }
+
+    public function testMoveEmails()
+    {
+        $testIds = [1, 2, 3];
+        $from = 'Aventine';
+        $to = 'Palatine';
+
+        $this->mockHordeSocket->expects($this->once())
+            ->method('copy')
+            ->with(
+                $from,
+                $to,
+                $this->callback(function ($arr) use ($testIds) {
+                    $this->assertArrayHasKey('ids', $arr);
+                    $this->assertInstanceOf(Horde_Imap_Client_Ids::class, $arr['ids']);
+                    $this->assertEquals($testIds, $arr['ids']->ids);
+                    $this->assertArrayHasKey('move', $arr);
+                    $this->assertTrue($arr['move']);
+                    return true;
+                })
+            )
+            ->willReturn('Los Emails');
+
+        $this->instance->moveEmails($testIds, $from, $to);
+    }
+
+    public function testDeleteEmails()
+    {
+        $testIds = [1, 2, 3];
+        $trash = 'Testaccio';
+        $from = 'Aventine';
+
+        $this->mockHordeSocket->expects($this->once())
+            ->method('copy')
+            ->with(
+                $from,
+                $trash,
+                $this->callback(function ($arr) use ($testIds) {
+                    $this->assertArrayHasKey('ids', $arr);
+                    $this->assertInstanceOf(Horde_Imap_Client_Ids::class, $arr['ids']);
+                    $this->assertEquals($testIds, $arr['ids']->ids);
+                    $this->assertArrayHasKey('move', $arr);
+                    $this->assertTrue($arr['move']);
+                    return true;
+                })
+            )
+            ->willReturn('Los Emails');
+
+        $this->instance->deleteEmails($testIds, $trash, $from);
+    }
 }
