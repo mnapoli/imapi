@@ -65,7 +65,7 @@ class Query
         $this->flags[$key] = $set;
     }
     
-    public function getFlags(): array
+    public function getFlags() : array
     {
         return $this->flags;
     }
