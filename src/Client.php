@@ -111,7 +111,7 @@ class Client
      * @param string[] $ids
      * @return Email[]
      */
-    public function getEmailsFromId(array $ids, string $folder = 'INBOX') : array
+    public function getEmailsFromIds(array $ids, string $folder = 'INBOX') : array
     {
         return $this->fetchEmails($folder, $ids);
     }
