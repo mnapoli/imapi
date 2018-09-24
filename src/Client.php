@@ -62,29 +62,7 @@ class Client
     {
         return array_keys($this->hordeClient->listMailboxes('*'));
     }
-
-    /**
-     * Finds the emails matching the query. If $query is null, then it will fetch the emails in the inbox.
-     *
-     * @return Email[]
-     */
-    public function getEmails(Query $query = null) : array
-    {
-        $hordeQuery = new Horde_Imap_Client_Search_Query();
-
-        $query = $query ?: new Query;
-
-        if ($query->getYoungerThan() !== null) {
-            $hordeQuery->intervalSearch(
-                $query->getYoungerThan(),
-                Horde_Imap_Client_Search_Query::INTERVAL_YOUNGER
-            );
-        }
-
-        $this->setFlags($hordeQuery, $query);
-        return $this->searchAndFetch($query->getFolder(), $hordeQuery);
-    }
-
+    
     /**
      * Finds the email Ids matching the query. If $query is null, then it will fetch the email Ids in the inbox.
      *
@@ -110,12 +88,22 @@ class Client
     }
 
     /**
+     * Finds the emails matching the query. If $query is null, then it will fetch the emails in the inbox.
+     *
+     * @return Email[]
+     */
+    public function getEmails(Query $query = null) : array
+    {
+        $ids = $this->getEmailIds($query);
+        return $this->fetchEmails($query->getFolder(), $ids);
+    }
+
+    /**
      * @return Email|null Returns null if the email was not found.
      */
     public function getEmailFromId(string $id, string $folder = 'INBOX')
     {
         $emails = $this->fetchEmails($folder, [$id]);
-
         return (count($emails) > 0) ? $emails[0] : null;
     }
 
@@ -154,23 +142,14 @@ class Client
     }
 
     /**
-     * @return Email[]
-     */
-    private function searchAndFetch(string $folder, Horde_Imap_Client_Search_Query $query) : array
-    {
-        return $this->fetchEmails($folder, $this->search($folder, $query));
-    }
-
-    /**
      * @return int[]
      */
     private function search(string $folder, Horde_Imap_Client_Search_Query $query) : array
     {
         $results = $this->hordeClient->search($folder, $query);
-        /** @var Horde_Imap_Client_Ids $results */
-        $results = $results['match'];
-
-        return $results->ids;
+        /** @var Horde_Imap_Client_Ids $ob */
+        $ob = $results['match'];
+        return $ob->ids;
     }
 
     private function fetchEmails(string $folder, array $ids) : array
